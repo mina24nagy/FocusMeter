@@ -11,7 +11,7 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('FocusMeter'),
+        title: const Text('Focus Meter'),
         actions: [
           IconButton(
             icon: const Icon(Icons.history),
