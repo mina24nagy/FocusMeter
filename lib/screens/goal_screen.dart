@@ -118,7 +118,8 @@ class _GoalScreenState extends State<GoalScreen> {
     if (date.isAfter(today)) return null;
 
     final totalMinutes = provider.getTotalMinutesForDay(day);
-    final isGoalMet = totalMinutes >= provider.dailyGoal;
+    final dailyGoalForDate = provider.getGoalForDate(day); // Use effective goal
+    final isGoalMet = totalMinutes >= dailyGoalForDate;
     final hasSessions = totalMinutes > 0;
     
     // 3 States Logic:
@@ -173,6 +174,7 @@ class _GoalScreenState extends State<GoalScreen> {
   Widget _buildSelectedDayDetails(SessionProvider provider, DateTime day) {
     final sessions = provider.getSessionsForDay(day);
     final totalMinutes = provider.getTotalMinutesForDay(day);
+    final dailyGoal = provider.getGoalForDate(day);
 
     return Card(
       child: Padding(
@@ -185,7 +187,13 @@ class _GoalScreenState extends State<GoalScreen> {
               style: const TextStyle(fontWeight: FontWeight.bold),
              ),
              const SizedBox(height: 8),
-             Text('Total: $totalMinutes minutes'),
+             Row(
+               children: [
+                 Text('Total: $totalMinutes minutes'),
+                 const Spacer(),
+                 Text('Goal: $dailyGoal minutes', style: const TextStyle(color: Colors.grey)),
+               ],
+             ),
              const Divider(),
              if (sessions.isEmpty)
                const Text('No sessions recorded.')

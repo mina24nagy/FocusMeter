@@ -16,7 +16,10 @@ class SessionProvider with ChangeNotifier {
 
   int getTotalMinutesForDay(DateTime day) => _storageService.getTotalMinutesForDay(day);
 
+
   List<Session> getSessionsForDay(DateTime day) => _storageService.getSessionsForDay(day);
+  
+  int getGoalForDate(DateTime day) => _storageService.getGoalForDate(day);
 
   Future<void> addSession(int minutes, String type, String? comment) async {
     final session = Session(
