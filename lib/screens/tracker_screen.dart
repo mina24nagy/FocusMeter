@@ -23,7 +23,7 @@ class _TrackerScreenState extends State<TrackerScreen> {
   final TextEditingController _commentController = TextEditingController();
   final TextEditingController _manualMinutesController = TextEditingController();
 
-  final List<String> _types = ['Work', 'Study', 'Side Project', 'Other'];
+
 
   @override
   void dispose() {
@@ -97,24 +97,62 @@ class _TrackerScreenState extends State<TrackerScreen> {
         child: Column(
           children: [
             // Type Selector
-            DropdownButtonFormField<String>(
-              value: _selectedType,
-              decoration: const InputDecoration(
-                labelText: 'Session Type',
-                border: OutlineInputBorder(),
-              ),
-              items: _types.map((type) {
-                return DropdownMenuItem(
-                  value: type,
-                  child: Text(type),
-                );
-              }).toList(),
-              onChanged: (value) {
-                if (value != null) {
-                  setState(() {
-                    _selectedType = value;
-                  });
+            Consumer<SessionProvider>(
+              builder: (context, provider, child) {
+                final types = provider.sessionTypes;
+                // Ensure selected type is valid
+                if (!types.contains(_selectedType) && types.isNotEmpty) {
+                   // This might happen if we just added a type or loaded from fresh state
+                   // But let's just keep _selectedType as is (it might be pre-filled)
+                   // Or default to first.
+                   if (_selectedType == 'Work' && !types.contains('Work')) {
+                       _selectedType = types.first;
+                   }
                 }
+
+                return DropdownButtonFormField<String>(
+                  value: _selectedType,
+                  decoration: const InputDecoration(
+                    labelText: 'Session Type',
+                    border: OutlineInputBorder(),
+                  ),
+                  items: [
+                    ...types.map((type) => DropdownMenuItem(
+                      value: type,
+                      child: Text(type),
+                    )),
+                    const DropdownMenuItem(
+                      value: '__add_new__',
+                      child: Row(
+                        children: [
+                          Icon(Icons.add, size: 20),
+                          SizedBox(width: 8),
+                          Text('Add New Type...'),
+                        ],
+                      ),
+                    ),
+                  ],
+                  onChanged: (value) async {
+                    if (value == '__add_new__') {
+                      // Show dialog to add new type
+                      final newType = await _showAddTypeDialog(context);
+                      if (newType != null && newType.isNotEmpty) {
+                        await provider.addSessionType(newType);
+                        setState(() {
+                          _selectedType = newType;
+                        });
+                      } else {
+                        // Revert to previous selection if cancelled
+                        // Force rebuild to reset dropdown value visually if needed
+                        setState(() {}); 
+                      }
+                    } else if (value != null) {
+                      setState(() {
+                        _selectedType = value;
+                      });
+                    }
+                  },
+                );
               },
             ),
             const SizedBox(height: 16),
@@ -193,6 +231,34 @@ class _TrackerScreenState extends State<TrackerScreen> {
             ],
           ],
         ),
+      ),
+    );
+  }
+
+  Future<String?> _showAddTypeDialog(BuildContext context) {
+    final controller = TextEditingController();
+    return showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('New Session Type'),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          decoration: const InputDecoration(
+            labelText: 'Type Name',
+            hintText: 'e.g. Reading, Exercise',
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, controller.text.trim()),
+            child: const Text('Add'),
+          ),
+        ],
       ),
     );
   }

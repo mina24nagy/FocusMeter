@@ -31,11 +31,16 @@ class StorageService {
   }
 
   List<Session> getSessionsForDay(DateTime date) {
-    return _sessionBox.values.where((session) {
+    final sessions = _sessionBox.values.where((session) {
       return session.timestamp.year == date.year &&
              session.timestamp.month == date.month &&
              session.timestamp.day == date.day;
     }).toList();
+    
+    // Sort by timestamp ascending (oldest first)
+    sessions.sort((a, b) => a.timestamp.compareTo(b.timestamp));
+    
+    return sessions;
   }
 
   List<Session> getAllSessions() {
@@ -132,5 +137,24 @@ class StorageService {
   int getTotalMinutesForDay(DateTime date) {
     final sessions = getSessionsForDay(date);
     return sessions.fold(0, (sum, session) => sum + session.durationMinutes);
+  }
+
+  // Session Types Management
+  static const String sessionTypesKey = 'sessionTypes';
+  
+  List<String> getSessionTypes() {
+    final types = _settingsBox.get(sessionTypesKey);
+    if (types == null) {
+      return ['Work', 'Study', 'Side Project'];
+    }
+    return (types as List).cast<String>();
+  }
+  
+  Future<void> addSessionType(String type) async {
+    final types = getSessionTypes();
+    if (!types.contains(type)) {
+      types.add(type);
+      await _settingsBox.put(sessionTypesKey, types);
+    }
   }
 }

@@ -21,6 +21,13 @@ class SessionProvider with ChangeNotifier {
   
   int getGoalForDate(DateTime day) => _storageService.getGoalForDate(day);
 
+  List<String> get sessionTypes => _storageService.getSessionTypes();
+
+  Future<void> addSessionType(String type) async {
+    await _storageService.addSessionType(type);
+    notifyListeners();
+  }
+
   Future<void> addSession(int minutes, String type, String? comment) async {
     final session = Session(
       id: const Uuid().v4(),
