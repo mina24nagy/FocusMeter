@@ -20,6 +20,14 @@ class StorageService {
     await _sessionBox.put(session.id, session);
   }
 
+  Future<void> updateSession(Session session) async {
+    await _sessionBox.put(session.id, session);
+  }
+
+  Future<void> deleteSession(String id) async {
+    await _sessionBox.delete(id);
+  }
+
   List<Session> getSessionsForDay(DateTime date) {
     return _sessionBox.values.where((session) {
       return session.timestamp.year == date.year &&

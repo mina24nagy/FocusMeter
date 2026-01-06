@@ -95,6 +95,64 @@ class HomeScreen extends StatelessWidget {
                                 subtitle: session.comment != null && session.comment!.isNotEmpty
                                     ? Text(session.comment!)
                                     : Text(DateFormat.jm().format(session.timestamp)),
+                                trailing: PopupMenuButton<String>(
+                                  onSelected: (value) async {
+                                    if (value == 'edit') {
+                                      _showEditSessionDialog(context, session);
+                                    } else if (value == 'delete') {
+                                      final confirm = await showDialog<bool>(
+                                        context: context,
+                                        builder: (context) => AlertDialog(
+                                          title: const Text('Delete Session'),
+                                          content: const Text(
+                                              'Are you sure you want to delete this session? This will affect your daily goal progress.'),
+                                          actions: [
+                                            TextButton(
+                                              onPressed: () => Navigator.pop(context, false),
+                                              child: const Text('Cancel'),
+                                            ),
+                                            TextButton(
+                                              onPressed: () => Navigator.pop(context, true),
+                                              style: TextButton.styleFrom(
+                                                  foregroundColor: Colors.red),
+                                              child: const Text('Delete'),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+
+                                      if (confirm == true) {
+                                        await provider.deleteSession(session.id);
+                                        if (context.mounted) {
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                              const SnackBar(content: Text('Session deleted')));
+                                        }
+                                      }
+                                    }
+                                  },
+                                  itemBuilder: (BuildContext context) => [
+                                    const PopupMenuItem(
+                                      value: 'edit',
+                                      child: Row(
+                                        children: [
+                                          Icon(Icons.edit, size: 20),
+                                          SizedBox(width: 8),
+                                          Text('Edit'),
+                                        ],
+                                      ),
+                                    ),
+                                    const PopupMenuItem(
+                                      value: 'delete',
+                                      child: Row(
+                                        children: [
+                                          Icon(Icons.delete, color: Colors.red, size: 20),
+                                          SizedBox(width: 8),
+                                          Text('Delete', style: TextStyle(color: Colors.red)),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             );
                           },
@@ -122,5 +180,78 @@ class HomeScreen extends StatelessWidget {
       case 'side project': return Icons.code;
       default: return Icons.timer;
     }
+  }
+
+  Future<void> _showEditSessionDialog(BuildContext context, Session session) async {
+    final durationController = TextEditingController(text: session.durationMinutes.toString());
+    final commentController = TextEditingController(text: session.comment);
+    String selectedType = session.type;
+    final formKey = GlobalKey<FormState>();
+
+    await showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: const Text('Edit Session'),
+          content: Form(
+            key: formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                DropdownButtonFormField<String>(
+                  value: selectedType,
+                  decoration: const InputDecoration(labelText: 'Activity Type'),
+                  items: ['Work', 'Study', 'Side Project', 'Other']
+                      .map((t) => DropdownMenuItem(value: t, child: Text(t)))
+                      .toList(),
+                  onChanged: (val) => setState(() => selectedType = val!),
+                ),
+                TextFormField(
+                  controller: durationController,
+                  decoration: const InputDecoration(labelText: 'Duration (minutes)'),
+                  keyboardType: TextInputType.number,
+                  validator: (val) {
+                    if (val == null || val.isEmpty) return 'Enter minutes';
+                    if (int.tryParse(val) == null) return 'Enter a valid number';
+                    return null;
+                  },
+                ),
+                TextFormField(
+                  controller: commentController,
+                  decoration: const InputDecoration(labelText: 'Comment (Optional)'),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                if (formKey.currentState!.validate()) {
+                  final newDuration = int.parse(durationController.text);
+                  final updatedSession = Session(
+                    id: session.id, // Keep same ID
+                    durationMinutes: newDuration,
+                    type: selectedType,
+                    comment: commentController.text,
+                    timestamp: session.timestamp, // Keep original timestamp
+                  );
+                  
+                  context.read<SessionProvider>().updateSession(updatedSession);
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Session updated')),
+                  );
+                }
+              },
+              child: const Text('Save'),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

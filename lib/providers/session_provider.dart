@@ -26,6 +26,16 @@ class SessionProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> updateSession(Session session) async {
+    await _storageService.updateSession(session);
+    notifyListeners();
+  }
+
+  Future<void> deleteSession(String id) async {
+    await _storageService.deleteSession(id);
+    notifyListeners();
+  }
+
   Future<void> updateDailyGoal(int minutes) async {
     await _storageService.setDailyGoal(minutes);
     notifyListeners();
