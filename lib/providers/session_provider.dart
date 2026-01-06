@@ -14,6 +14,10 @@ class SessionProvider with ChangeNotifier {
 
   int get todayTotalMinutes => _storageService.getTotalMinutesForDay(DateTime.now());
 
+  int getTotalMinutesForDay(DateTime day) => _storageService.getTotalMinutesForDay(day);
+
+  List<Session> getSessionsForDay(DateTime day) => _storageService.getSessionsForDay(day);
+
   Future<void> addSession(int minutes, String type, String? comment) async {
     final session = Session(
       id: const Uuid().v4(),
@@ -35,6 +39,10 @@ class SessionProvider with ChangeNotifier {
     await _storageService.deleteSession(id);
     notifyListeners();
   }
+
+
+
+
 
   Future<void> updateDailyGoal(int minutes) async {
     await _storageService.setDailyGoal(minutes);

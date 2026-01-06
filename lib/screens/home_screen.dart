@@ -18,7 +18,8 @@ class HomeScreen extends StatelessWidget {
             onPressed: () {
               Navigator.pushNamed(context, '/goal');
             },
-          )
+          ),
+
         ],
       ),
       body: Consumer<SessionProvider>(
