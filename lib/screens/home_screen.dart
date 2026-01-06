@@ -167,7 +167,7 @@ class HomeScreen extends StatelessWidget {
         onPressed: () {
           Navigator.pushNamed(context, '/tracker');
         },
-        label: const Text('Start Session'),
+        label: const Text('Log Session'),
         icon: const Icon(Icons.play_arrow),
       ),
     );

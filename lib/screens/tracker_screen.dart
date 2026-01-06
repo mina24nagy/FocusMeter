@@ -11,7 +11,7 @@ class TrackerScreen extends StatefulWidget {
 }
 
 class _TrackerScreenState extends State<TrackerScreen> {
-  bool _isManualMode = false;
+  bool _isManualMode = true;
   
   // Timer State
   Timer? _timer;
