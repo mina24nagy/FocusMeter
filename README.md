@@ -1,4 +1,4 @@
-# focus_tracker
+# FocusMeter
 
 A new Flutter project.
 

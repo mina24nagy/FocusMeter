@@ -1,6 +1,6 @@
 {
-    "name": "focus_tracker",
-    "short_name": "focus_tracker",
+    "name": "FocusMeter",
+    "short_name": "FocusMeter",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

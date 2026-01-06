@@ -27,7 +27,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Focus Tracker',
+      title: 'FocusMeter',
       theme: ThemeData(
         primarySwatch: Colors.indigo,
         useMaterial3: true,
